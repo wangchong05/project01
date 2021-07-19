@@ -1,0 +1,184 @@
+1.解释：
+是通过JS改变CSS编写方式的解决方案。
+常规CSS有一些弊端，常规CSS所不好处理的逻辑复杂、函数方法、复用、避免干扰。
+跟React搭配时可以将样式书写将直接依附在JSX上面。
+styled-components使用标签模板来对组件进行样式化。
+实际上style.button` `是JS的新语法特性，属于ES6的标签模板功能。
+移除了组件和样式之间的映射，就是当定义自己的样式时，实际上创造了一个正常的React组件，自己的样式也附在它上面。
+会生成真实的样式表，并通过className属性链接生成的样式表内容。在JS运行时，会生成一份真实的style节点插入到document的head内。但是styled-components生成的style样式表一般是在head头部的最底下，跟普通css级别相同，所以它会覆盖普通css。
+
+2.特性：
+Automatic critical CSS: styled-components 持续跟踪页面上渲染的组件,并向自动其注入且仅注入样式. 结合使用代码拆分, 可以实现仅加载所需的最少代码.
+解决了 class name 冲突: styled-components 为样式生成唯一的 class name. 开发者不必再担心 class name 重复,覆盖和拼写错误的问题.
+CSS 更容易移除: 想要确切的知道代码中某个 class 在哪儿用到是很困难的. 使用 styled-components 则很轻松, 因为每个样式都有其关联的组件. 如果检测到某个组件未使用并且被删除,则其所有的样式也都被删除.
+简单的动态样式: 可以很简单直观的实现根据组件的 props 或者全局主题适配样式,无需手动管理数十个 classes.
+无痛维护: 无需搜索不同的文件来查找影响组件的样式.无论代码多庞大，维护起来都是小菜一碟。
+自动提供前缀: 按照当前标准写 CSS,其余的交给 styled-components handle 处理.
+
+3.安装：
+npm install --save styled-components
+
+4.例子：
+const Title = styled.h1`
+  font-size: 1.5em;
+  text-align: center;
+  color: palevioletred;
+`;
+
+const Wrapper = styled.section`
+  padding: 4em;
+  background: papayawhip;
+`;
+
+// Title、Wapper都跟正常组件一样
+
+render(
+  <Wrapper>
+    <Title>
+      Hello World
+    </Title>
+  </Wrapper>
+);
+--------------------------------------------------------------------------------
+基本特性：透传props、样式化组件、扩展样式、添加属性。
+高级特性：ThemeProvider容器组件、Refs、媒体查询
+5.透传props：
+styled-components会透传所有的props属性,基于props做样式判断。
+styled-components利用模板字符串的用处在于可以给内部的props赋值。
+const Button = styled.button`
+  background: ${props => props.primary ? 'palevioletred' : 'white'};
+  color: ${props => props.primary ? 'white' : 'palevioletred'};
+  font-size: 1em;
+`;
+
+render(
+  <div>
+    <Button>Normal</Button>
+    <Button primary>Primary</Button>
+  </div>
+);
+6.样式化任意组件:
+const Link = ({ className, children }) => (
+  <a className={className}>
+    {children}
+  </a>
+)
+
+const StyledLink = styled(Link)`// 使用了上面的Link
+  color: palevioletred;
+  font-weight: bold;
+`;
+//Link可以单独使用，也可以再加工使用
+render(
+  <div>
+    <Link>Unstyled, boring Link</Link>
+    <StyledLink>Styled, exciting Link</StyledLink>
+  </div>
+);
+7.扩展样式：
+要在样式组件上做点扩展，添加一些额外样式。可以用.extend，
+.extend对样式组件有效，如果是其他React组件，需要用styled样式化一下。
+const Button = styled.button`
+  color: palevioletred;
+  font-size: 1em;
+  border: 2px solid palevioletred;
+  border-radius: 3px;
+`;
+const TomatoButton = Button.extend`
+  color: tomato;
+  border-color: tomato;
+`;
+
+render(
+  <div>
+    <Button>Normal Button</Button>
+    <TomatoButton>Tomato Button</TomatoButton>
+  </div>
+);
+withComponent也可以扩展样式和替换标签：
+const Button = styled.button`
+  display: inline-block;
+  color: palevioletred;
+  border: 2px solid palevioletred;
+  border-radius: 3px;
+`;
+const Link = Button.withComponent('a')// 把Button标签替换成a
+const TomatoLink = Link.extend`// 扩展Link标签
+  color: tomato;
+  border-color: tomato;
+`;
+
+render(
+  <div>
+    <Button>Normal Button</Button>
+    <Link>Normal Link</Link>
+    <TomatoLink>Tomato Link</TomatoLink>
+  </div>
+);
+8.添加attr：
+使用attrsAPI来为样式组件添加一些attr属性，它们也可以通过标签模板插值函数拿到props传值。
+const Input = styled.input.attrs({
+  type: 'password',
+  margin: props => props.size || '1em',
+  padding: props => props.size || '1em'
+})`
+  color: palevioletred;
+  font-size: 1em;
+  border: 2px solid palevioletred;
+  border-radius: 3px;
+
+  /* here we use the dynamically computed props */
+  margin: ${props => props.margin};
+  padding: ${props => props.padding};
+`;
+
+render(
+  <div>
+    <Input placeholder="A small text input" size="1em" />
+    <Input placeholder="A bigger text input" size="2em" />
+  </div>
+);
+9.ThemeProvider容器组件：
+类似于react-rudux的顶层组件Provider，通过context实现了从顶层到底层所有样式组件的默认主题共用。
+const Button = styled.button`
+  font-size: 1em;
+  color: ${props => props.theme.main};
+  border: 2px solid ${props => props.theme.main};
+`;
+
+Button.defaultProps = {
+  theme: {
+    main: 'palevioletred'
+  }
+}
+
+const theme = {
+  main: 'mediumseagreen'
+};
+
+render(
+  <div>
+    <Button>Normal</Button>
+    <ThemeProvider theme={theme}>
+      <Button>Themed</Button>
+    </ThemeProvider>
+  </div>
+);
+10.媒体查询：
+const Content = styled.div`
+  background: papayawhip;
+  height: 3em;width: 3em;
+
+  @media (max-width: 700px) {
+    background: palevioletred;
+  }
+`;
+
+render(
+  <Content />
+);
+
+
+
+
+

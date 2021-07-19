@@ -1,0 +1,82 @@
+
+链接
+
+一、解释：
+需要为React组件编写可维护的测试。
+测试将使用实际的DOM节点。
+React Testing Library并不关心实际的组件。
+
+测试套件describe。
+测试块（测试用例）test。
+
+一个测试组件可以有多个测试用例，一个测试用例不必在一个测试套件中。
+放在测试用例中的东西叫断言，比如expect，结果成功或失败。
+
+执行test自动匹配所有test后缀的 文件。
+
+二、渲染元素：
+render渲染元素。把react元素渲染到DOM中。
+
+三、抓取元素：
+screen抓取到节点样式，抓取到这些元素用于 断言或交互。
+
+1.getByText选择元素、定位元素：
+screen.getByText('Search:');// 抓取search文本
+直接用这样可以作为隐式断言，因为元素不在的话会抛出错误。
+传参可传字符串（精准匹配）、正则（用于部分匹配）。
+expect(screen.getByText('Search:')).toBeInTheDocument();
+expect(screen.getByText(/Search/)).toBeInTheDocument();
+2.getByRole选择元素、定位类型：
+如果提供一个在呈现的组件中的html中不可用的角色，它会在命令行报错，但是也会把所有可选角色显示出来。
+
+3.其他搜索类型：
+
+
+
+四、搜索variants：
+搜索变体：getBy、queryBy、findBy
+
+三者区别：
+getBy在无法定位元素时，会抛出一个异常。这是一个便利的副作用，可以让开发者更早地注意到测试代码中发生了某些错误。
+想要验证一个元素不在页面中，使用queryBy，否则使用getBy。
+可以用queryBy去检查元素不显示。
+findBy变体用于那些最终会显示在页面当中的异步元素。
+
+五、断言函数：
+toBeDisabled
+toBeEmptyDOMElement
+toBeInTheDocument
+toHaveAttribute
+toHaveStyle
+toHaveTextContent
+toHaveValue
+toHaveDisplayValue
+......
+
+六、fireEvent:
+实际的用户交互，fireEvent去触发用户交互。
+
+函数需要两个参数，一个参数是定位的元素（例子中使用 textbox role 定位 input），
+另一个参数是event（例子中的 event 拥有属性 value ，value 的值为 "JavaScript"）
+
+七、用户事件（User Event）：userEvent也可以去触发用户交互。
+常用userEvent代替fireEvent，因为userEvent的API相比于fireEvent的API更真实地模仿了浏览器行为。
+所以要优先使用userEvent 而不是 fireEvent。
+例如： 
+fireEvent.change()函数触发了浏览器的change事件，
+但是 userEvent.type触发了浏览器的 chagnge，keyDown，keyPress，keyUp事件。
+
+比如测试change事件，代码中一下写入十个字符，当fireEvent触发change事件只调用了一次回调函数，但userEvent对每个字母的输入都会触发回调（触发了十次）。
+
+八、处理回调：
+jest.fn()
+const onChange = jest.fn();// 通过Jest的工具去mock一个onChange函数并传递给组件
+
+
+九、异步：
+通过async / await及findBy去等待定位一些开始不在，但最后一定会显示出来的元素来进行测试。
+
+
+
+
+
